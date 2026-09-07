@@ -9,6 +9,7 @@ jobs:
     runs-on: windows-latest
 
     steps:
+
       - name: Download repository
         uses: actions/checkout@v4
 
@@ -21,7 +22,8 @@ jobs:
 
       - name: Build application
         shell: powershell
-        run: cargo tauri build --manifest-path src-tauri/Cargo.toml
+        working-directory: src-tauri
+        run: cargo tauri build
 
       - name: Upload EXE
         uses: actions/upload-artifact@v4
