@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAWK T1 — Flight Checklist</title>
+<link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+:root {
+  --bg: #202024;
+  --card: #2a2a2f;
+  --text: #e8e5df;
+  --muted: #9a978f;
+  --accent: #c47046;
+  --accent-soft: rgba(196,112,70,.18);
+  --accent2: #7ba8b8;
+  --accent2-soft: rgba(123,168,184,.14);
+  --border: rgba(232,229,223,.12);
+}
+* { box-sizing: border-box; }
+html, body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(1200px 600px at 80% -10%, rgba(196,112,70,.10), transparent 60%), var(--bg);
+  color: var(--text);
+  font-family: 'Red Hat Display', Arial, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom Checkboxes */
+.cbx {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0;
+  transition: all .15s;
+}
+.cbx:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.cbx:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 7px;
+  height: 13px;
+  border: solid #fff;
+  border-width: 0 2.5px 2.5px 0;
+  transform: rotate(45deg);
+}
+.cbx:hover:not(:checked) {
+  border-color: var(--accent);
+}
+
+/* Step Rows */
+.step-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  transition: background .15s;
+}
+.step-row:hover {
+  background: rgba(232,229,223,.03);
+}
+.step-row.checked {
+  background: var(--accent-soft);
+}
+.step-row.checked .step-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+/* Tab Buttons */
+.tab-btn {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .15s;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.tab-btn:hover {
+  color: var(--text);
+  border-color: var(--muted);
+}
+.tab-btn.active {
+  background: var(--accent-soft);
+  color: var(--text);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* Progress Bars */
+.progress-bar {
+  height: 6px;
+  background: var(--card);
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  transition: width .3s;
+  border-radius: 99px;
+}
+
+/* Buttons */
+.reset-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: all .15s;
+  font-family: inherit;
+}
+.reset-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.primary-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all .15s;
+  font-family: inherit;
+}
+.primary-btn:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Tags */
+.both-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: var(--accent2-soft);
+  color: var(--accent2);
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+  border: 1px solid rgba(123,168,184,.3);
+}
+.key-tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: rgba(123,168,184,.15);
+  color: var(--accent2);
+  font-family: monospace;
+  font-size: 11px;
+  border: 1px solid rgba(123,168,184,.25);
+}
+.warn-tag {
+  display: inline-block;
+  padding: 1px 8px;
+  border-radius: 99px;
+  background: rgba(196,112,70,.15);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  border: 1px solid rgba(196,112,70,.3);
+  margin-left: 6px;
+}
+.timer-quick-btn {
+  padding: 2px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 600;
+  margin-left: 8px;
+  font-family: inherit;
+  transition: all .15s;
+}
+.timer-quick-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Section Headers */
+.section-head {
+  padding: 10px 14px;
+  background: var(--accent-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  margin: 16px 0 0 0;
+  color: var(--text);
+}
+
+/* Panels */
+.card-panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.qr-wrap {
+  padding: 10px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  text-align: center;
+}
+.qr-wrap img {
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
+}
+
+/* Timer Panel */
+.timer-panel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.timer-display {
+  font-family: 'Courier New', monospace;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 2px;
+  min-width: 95px;
+  text-align: center;
+  line-height: 1.1;
+}
+.timer-btn {
+  padding: 6px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all .15s;
+  font-family: inherit;
+}
+.timer-btn:hover {
+  border-color: var(--accent);
+}
+.timer-btn.start {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--text);
+}
+.timer-btn.start:hover {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .step-row { padding: 9px 10px; }
+  .tab-btn { padding: 8px 10px; font-size: 12px; }
+  .timer-display { font-size: 22px; min-width: 75px; }
+}
+</style>
+</head>
+<body>
+
+<div id="app" style="max-width:1100px;margin:0 auto;padding:20px 16px 40px;"></div>
+
+<script>
+(function(){
+  var CARDS = [
+    {
+      id: 'engine',
+      name: 'Engine Start',
+      icon: '⚙',
+      sections: [
+        {
+          title: 'External & Pre-Start',
+          steps: [
+            { text: 'Chocks — IN' },
+            { text: 'Parking Brake — ON' },
+            { text: 'Covers, flags & steps — REMOVED' },
+            { text: 'LP Fuel Cock — ON' },
+            { text: 'Battery 1 & 2 — ON' },
+            { text: 'Engine Start Switch — ON', both: true },
+            { text: 'Ignition — NORMAL' },
+            { text: 'Anti-Skid — ON', both: true },
+            { text: 'Oxygen — ON', both: true },
+            { text: 'Air Conditioning — NORMAL' },
+            { text: 'UHF Radio — BOTH' },
+            { text: 'VHF Radio — TR + G' },
+            { text: 'TACAN — TX/RX' },
+            { text: 'ILS — ON, tune frequency' },
+            { text: 'Transponder — STBY, set squawk' },
+            { text: 'ALTIMETER CALIBRATE — press COMMA key', key: ',' },
+            { text: 'HRS Panel — SLV (Slave), allow to align' },
+            { text: 'Pitot Heat — OFF for now' }
+          ]
+        },
+        {
+          title: 'Start Sequence',
+          steps: [
+            { text: 'Relight Button — PRESS & RELEASE' },
+            { text: '⏳ WAIT — GTS Light → GREEN' },
+            { text: 'Engine Start Switch — START & RELEASE' },
+            { text: '⏳ WAIT — Rotation GREEN + RPM 15–20%' },
+            { text: 'Throttle — IDLE (against stop)' },
+            { text: '⚠ MONITOR TGT — MUST NOT EXCEED 570°C', warn: true },
+            { text: 'At ~45% RPM — GTS & Rotation lights OUT' },
+            { text: 'RPM stabilises at ~52%' },
+            { text: 'Fire / OIL / FPR / TRANS captions — ALL OUT' },
+            { text: 'Throttle — SLIGHTLY FORWARD to close Bleed Valve' },
+            { text: 'HYD 2 — RESET, check pressure normal' },
+            { text: 'Generator / AC captions — OUT, press RESET if needed' },
+            { text: 'Voltmeter — 27–29 Volts' },
+            { text: 'Pitot Heat — ON' },
+            { text: 'Transponder — NORM' },
+            { text: 'Canopy — CLOSED & LOCKED' },
+            { text: 'Lights — Nav ON, Anti-Collision WHITE, Taxi ON' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'taxi',
+      name: 'Taxying',
+      icon: '🚕',
+      sections: [
+        {
+          title: 'Taxi & Before Take-Off',
+          steps: [
+            { text: 'Flaps — MID' },
+            { text: 'Flight Controls — FULL & FREE in all axes' },
+            { text: 'Parking Brake — RELEASE' },
+            { text: 'Throttle — GENTLE, begin moving' },
+            { text: 'Brakes — CHECK, maintain slow speed' },
+            { text: 'At Holding Point — STOP, Parking Brake ON' },
+            { text: 'Pitot Heat — CONFIRM ON' },
+            { text: 'Anti-Skid — CONFIRM ON, SKID caption OUT' },
+            { text: 'Flaps — CONFIRM MID' },
+            { text: 'Harness — TIGHT & LOCKED' },
+            { text: 'Landing Gear — DOWN (button IN)' },
+            { text: 'Radios / Nav / Transponder — SET & CHECKED' },
+            { text: 'Altimeter — SET' },
+            { text: 'Canopy — CHECK LOCKED' },
+            { text: 'Taxi / Landing Lights — ON' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'takeoff',
+      name: 'Take-Off',
+      icon: '🛫',
+      sections: [
+        {
+          title: 'Runway & Departure',
+          steps: [
+            { text: 'Parking Brake — RELEASE' },
+            { text: 'Throttle — FULL POWER smoothly' },
+            { text: 'Rudder — MAINTAIN DIRECTION' },
+            { text: 'RPM — 104% MAX, TGT — 665°C MAX' },
+            { text: 'At ~155–160 kt — ROTATE smoothly' },
+            { text: 'Positive rate — GEAR UP (below 200kt)' },
+            { text: 'Positive rate — FLAPS UP (below 200kt)' },
+            { text: 'Taxi / Landing Lights — OFF' },
+            { text: 'CWP — CLEAR' },
+            { text: 'Trims — ADJUST for climb' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'landing',
+      name: 'After Landing',
+      icon: '🛬',
+      sections: [
+        {
+          title: 'Recovery & Securing',
+          steps: [
+            { text: 'Slow to taxi speed' },
+            { text: 'Pitot Heat — OFF' },
+            { text: 'Anti-Skid — OFF' },
+            { text: 'Flaps — UP or as required' },
+            { text: 'Landing Lights — TAXI' },
+            { text: 'Transponder — STBY or OFF' },
+            { text: 'ILS / TACAN — OFF or STBY' },
+            { text: 'Radios not in use — OFF' },
+            { text: 'Canopy — OPEN (if shutting down)' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'refuel',
+      name: 'Quick Refuel',
+      icon: '⛽',
+      sections: [
+        {
+          title: 'Engine OFF — Systems STAY ON',
+          steps: [
+            { text: 'STOP — Parking Brake ON' },
+            { text: '⏳ IDLE 30 sec minimum — cool down', timer: true },
+            { text: 'Engine Start Switch — OFF', both: true },
+            { text: 'Throttle — HP FUEL SHUTOFF (fully aft)' },
+            { text: 'Fuel Pump — OFF' },
+            { text: 'LP Fuel Cock — OFF' },
+            { text: '✅ BATTERIES — STAY ON (preserves AHRS!)' },
+            { text: '✅ OXYGEN — STAY ON', both: true },
+            { text: '✅ RADIOS / NAV / AIRCON — STAY AS IS' },
+            { text: 'Refuel — ground crew clear, caps secured' }
+          ]
+        },
+        {
+          title: 'Quick Restart',
+          steps: [
+            { text: 'LP Fuel Cock — ON' },
+            { text: 'Fuel Pump — ON' },
+            { text: 'Throttle — IDLE (against stop)' },
+            { text: 'Engine Start Switch — ON', both: true },
+            { text: 'Ignition — NORMAL' },
+            { text: 'Relight → GTS GREEN → START → 15–20% RPM → IDLE' },
+            { text: '✅ AHRS already aligned — SKIP calibration!' },
+            { text: 'Radios / Nav / Aircon already set — VERIFY' },
+            { text: 'READY FOR TAXI' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'shutdown',
+      name: 'Shutdown',
+      icon: '🔌',
+      sections: [
+        {
+          title: 'Secure Aircraft',
+          steps: [
+            { text: '⏳ IDLE 30 sec minimum — cool down', timer: true },
+            { text: 'Parking Brake — ON' },
+            { text: 'Engine Start Switch — OFF', both: true },
+            { text: 'Fuel Pump — OFF' },
+            { text: 'Throttle — HP FUEL SHUTOFF (fully aft)' },
+            { text: 'LP Fuel Cock — OFF' },
+            { text: 'Wait RPM — ZERO' },
+            { text: 'Oxygen — OFF', both: true },
+            { text: 'Transponder / ILS / TACAN — OFF' },
+            { text: 'Radios — OFF' },
+            { text: 'Air Conditioning — OFF' },
+            { text: 'Batteries 1 & 2 — OFF (LAST!)' },
+            { text: 'Canopy — OPEN' },
+            { text: '✅ AIRCRAFT SECURED' }
+          ]
+        }
+      ]
+    }
+  ];
+
+  var app = document.getElementById('app');
+  var state = { activeCard: 0, checks: {}, timer: { running: false, elapsed: 0, interval: null } };
+  try { var saved = localStorage.getItem('hawk-checklist-state'); if(saved) state.checks = JSON.parse(saved); } catch(e){}
+
+  function saveState(){ try{ localStorage.setItem('hawk-checklist-state', JSON.stringify(state.checks)); } catch(e){} }
+  function isChecked(cardId, sectionIdx, stepIdx){ return !!state.checks[cardId + '_' + sectionIdx + '_' + stepIdx]; }
+  function setChecked(cardId, sectionIdx, stepIdx, val){ state.checks[cardId + '_' + sectionIdx + '_' + stepIdx] = val; saveState(); render(); }
+  function getCardProgress(card){ var total=0, done=0; card.sections.forEach(function(sec,si){ sec.steps.forEach(function(st,sti){ total++; if(isChecked(card.id,si,sti)) done++; }); }); return total===0?0:Math.round((done/total)*100); }
+  function getTotalProgress(){ var total=0, done=0; CARDS.forEach(function(card){ card.sections.forEach(function(sec,si){ sec.steps.forEach(function(st,sti){ total++; if(isChecked(card.id,si,sti)) done++; }); }); }); return total===0?0:Math.round((done/total)*100); }
+  function resetCard(cardId){ Object.keys(state.checks).forEach(function(k){ if(k.startsWith(cardId+'_')) delete state.checks[k]; }); saveState(); render(); }
+  function resetAll(){ if(confirm('Reset ALL checklists?')){ state.checks = {}; saveState(); render(); } }
+
+  function formatTime(ms){
+    var totalSec = Math.floor(ms/1000);
+    var m = Math.floor(totalSec/60);
+    var s = totalSec % 60;
+    var cs = Math.floor((ms%1000)/10);
+    return (m<10?'0':'')+m+':'+(s<10?'0':'')+s+'.'+(cs<10?'0':'')+cs;
+  }
+
+  function timerStart(){
+    if(state.timer.running) return;
+    state.timer.running = true;
+    state.timer.startTime = Date.now() - state.timer.elapsed;
+    state.timer.interval = setInterval(function(){
+      state.timer.elapsed = Date.now() - state.timer.startTime;
+      var disp = document.getElementById('timer-display');
+      if(disp) disp.textContent = formatTime(state.timer.elapsed);
+    }, 50);
+    render();
+  }
+  function timerStop(){
+    state.timer.running = false;
+    if(state.timer.interval){ clearInterval(state.timer.interval); state.timer.interval = null; }
+    render();
+  }
+  function timerReset(){
+    timerStop();
+    state.timer.elapsed = 0;
+    render();
+  }
+  function timerPreset(sec){
+    timerStop();
+    state.timer.elapsed = sec * 1000;
+    render();
+  }
+
+  function render(){
+    var activeCard = CARDS[state.activeCard];
+    var totalProg = getTotalProgress();
+
+    var html = '';
+
+    // Header
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:20px;">';
+    html += '<div style="display:flex;align-items:center;gap:14px;">';
+    html += '<svg width="44" height="44" viewBox="0 0 100 100"><circle cx="50" cy="50" r="48" fill="#C8102E"/><circle cx="50" cy="50" r="34" fill="white"/><circle cx="50" cy="50" r="20" fill="#0039A6"/></svg>';
+    html += '<div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600;">RAF Valley · AP 101B-4401-14</div><div style="font-size:22px;font-weight:700;color:var(--text);">HAWK T1 — Flight Checklist</div></div>';
+    html += '</div>';
+    html += '<div style="display:flex;align-items:center;gap:10px;"><div style="text-align:right;"><div style="font-size:11px;color:var(--muted);">Overall Progress</div><div style="font-size:20px;font-weight:700;color:var(--accent);">' + totalProg + '%</div></div><button class="reset-btn" onclick="window.__hawkResetAll()">Reset All</button></div>';
+    html += '</div>';
+
+    // Overall progress bar
+    html += '<div class="progress-bar" style="margin-bottom:16px;"><div class="progress-fill" style="width:' + totalProg + '%;"></div></div>';
+
+    // Timer + Save + QR row
+    html += '<div style="display:grid;grid-template-columns:1fr auto auto;gap:16px;margin-bottom:20px;align-items:stretch;">';
+
+    // Timer panel
+    html += '<div class="timer-panel">';
+    html += '<div style="font-size:22px;color:var(--accent2);">⏱</div>';
+    html += '<div>';
+    html += '<div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;font-weight:600;">Stopwatch</div>';
+    html += '<div id="timer-display" class="timer-display">' + formatTime(state.timer.elapsed) + '</div>';
+    html += '</div>';
+    html += '<div style="display:flex;gap:6px;flex-wrap:wrap;">';
+    if(!state.timer.running){
+      html += '<button class="timer-btn start" onclick="window.__hawkTimerStart()">Start</button>';
+    } else {
+      html += '<button class="timer-btn" onclick="window.__hawkTimerStop()" style="background:rgba(196,112,70,.15);border-color:var(--accent);color:var(--accent);">Stop</button>';
+    }
+    html += '<button class="timer-btn" onclick="window.__hawkTimerReset()">Reset</button>';
+    html += '<button class="timer-btn" onclick="window.__hawkTimerPreset(30)" title="Set 30 seconds for idle cooldown">30s</button>';
+    html += '</div>';
+    html += '</div>';
+
+    // Save instructions
+    html += '<div class="card-panel" style="padding:14px 16px;display:flex;align-items:center;gap:14px;min-width:240px;">';
+    html += '<div style="width:44px;height:44px;border-radius:10px;background:var(--accent2-soft);border:1px solid rgba(123,168,184,.3);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">📱</div>';
+    html += '<div style="flex:1;"><div style="font-weight:700;font-size:13px;margin-bottom:2px;">Save to iPad</div><div style="font-size:11px;color:var(--muted);line-height:1.5;">Tap <span class="key-tag">Share</span> → <span class="key-tag">Add to Home Screen</span></div></div>';
+    html += '</div>';
+
+    // QR Code
+    html += '<div class="qr-wrap"><div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px;font-weight:600;">Scan QR</div>';
+    html += '<img id="qrcode" alt="QR Code" style="width:80px;height:80px;" onerror="this.style.display=\'none\';">';
+    html += '</div>';
+
+    html += '</div>'; // close grid
+
+    // Tab bar
+    html += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">';
+    CARDS.forEach(function(card, idx){
+      var prog = getCardProgress(card);
+      var active = idx === state.activeCard;
+      html += '<button class="tab-btn' + (active?' active':'') + '" onclick="window.__hawkTab(' + idx + ')" style="display:flex;align-items:center;gap:8px;">';
+      html += '<span>' + card.icon + '</span><span>' + card.name + '</span>';
+      if(prog > 0) html += '<span style="font-size:11px;color:' + (prog===100?'var(--accent)':'var(--muted)') + ';font-weight:600;">' + prog + '%</span>';
+      html += '</button>';
+    });
+    html += '</div>';
+
+    // Active card panel
+    html += '<div class="card-panel">';
+
+    // Card header
+    var cardProg = getCardProgress(activeCard);
+    html += '<div style="padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;">';
+    html += '<div><div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.12em;font-weight:600;">Card ' + (state.activeCard+1) + ' of ' + CARDS.length + '</div><div style="font-size:20px;font-weight:700;">' + activeCard.icon + '  ' + activeCard.name + '</div></div>';
+    html += '<div style="display:flex;align-items:center;gap:12px;"><div style="text-align:right;"><div style="font-size:11px;color:var(--muted);">Card Progress</div><div style="font-size:18px;font-weight:700;color:var(--accent);">' + cardProg + '%</div></div>';
+    html += '<button class="reset-btn" onclick="window.__hawkResetCard(\'' + activeCard.id + '\')">Reset Card</button></div>';
+    html += '</div>';
+    html += '<div style="padding:0 18px;"><div class="progress-bar" style="margin:12px 0;"><div class="progress-fill" style="width:' + cardProg + '%;"></div></div></div>';
+
+    // Sections & steps
+    activeCard.sections.forEach(function(section, si){
+      html += '<div style="padding:0 6px;">';
+      html += '<div class="section-head">' + section.title + '</div>';
+      section.steps.forEach(function(step, sti){
+        var checked = isChecked(activeCard.id, si, sti);
+        var cid = 'cbx_' + activeCard.id + '_' + si + '_' + sti;
+        html += '<div class="step-row' + (checked?' checked':'') + '">';
+        html += '<input type="checkbox" class="cbx" id="' + cid + '"' + (checked?' checked':'') + ' onchange="window.__hawkCheck(\'' + activeCard.id + '\',' + si + ',' + sti + ',this.checked)">';
+        html += '<label for="' + cid + '" style="flex:1;cursor:pointer;font-size:14px;line-height:1.5;padding-top:2px;">';
+        html += '<span class="step-text">' + step.text + '</span>';
+        if(step.both) html += '<span class="both-tag">BOTH COCKPITS</span>';
+        if(step.key) html += ' <span class="key-tag">' + step.key + '</span>';
+        if(step.warn) html += ' <span class="warn-tag">⚠ MONITOR</span>';
+        if(step.timer) html += ' <button class="timer-quick-btn" onclick="event.preventDefault();window.__hawkTimerPreset(30);window.__hawkTimerStart();">⏱ 30s</button>';
+        html += '</label></div>';
+      });
+      html += '</div>';
+    });
+
+    html += '</div></div>'; // close card-panel
+
+    // Footer
+    html += '<div style="text-align:center;margin-top:24px;font-size:11px;color:var(--muted);">Authentic RAF procedures · Adapted for Just Flight Hawk T1/A · Progress auto-saves locally</div>';
+
+    app.innerHTML = html;
+
+    // Set QR code
+    var qr = document.getElementById('qrcode');
+    if(qr) qr.src = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=0&data=' + encodeURIComponent('HAWK T1 CHECKLIST — Save to iPad: Share → Add to Home Screen');
+  }
+
+  window.__hawkTab = function(idx){ state.activeCard = idx; render(); };
+  window.__hawkCheck = function(cid, si, sti, val){ setChecked(cid, si, sti, val); };
+  window.__hawkResetCard = function(cid){ resetCard(cid); };
+  window.__hawkResetAll = function(){ resetAll(); };
+  window.__hawkTimerStart = function(){ timerStart(); };
+  window.__hawkTimerStop = function(){ timerStop(); };
+  window.__hawkTimerReset = function(){ timerReset(); };
+  window.__hawkTimerPreset = function(sec){ timerPreset(sec); };
+
+  render();
+})();
+</script>
+
+</body>
+</html>
