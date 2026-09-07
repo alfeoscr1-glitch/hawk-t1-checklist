@@ -3,9 +3,11 @@
   "productName": "Hawk T1 Flight Checklist",
   "version": "1.0.0",
   "identifier": "com.hawkt1.flightchecklist",
+
   "build": {
-    "frontendDist": "."
+    "frontendDist": "../web"
   },
+
   "app": {
     "windows": [
       {
@@ -15,13 +17,16 @@
         "resizable": true
       }
     ],
+
     "security": {
       "csp": null
     }
   },
+
   "bundle": {
     "active": true,
     "targets": "nsis",
+
     "windows": {
       "webviewInstallMode": {
         "type": "embedBootstrapper"
